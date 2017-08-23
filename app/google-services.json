@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "501317619324-rjde93qte6ht9moil1u2go09mg6m2kig.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "chatapp.com.claudineibjr.androidchatapp",
+            "certificate_hash": "a4b4a3b97b96443ef180664c5a61195ccac957bd"
+          }
+        },
+        {
           "client_id": "501317619324-pbs7md7ob7iq773iqpa62imu71bttcgh.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "501317619324-pbs7md7ob7iq773iqpa62imu71bttcgh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

@@ -98,7 +98,7 @@ public class Login extends AppCompatActivity {
                             //Indo para a próxima tela
                             Intent intent = new Intent(Login.this, MainActivity.class);
                             intent.putExtra("usuarioLogado", usuarioLogado);
-                            intent.putExtra("cadastro", cadastro);
+                            intent.putExtra("cadastro", true);
 
                             startActivity(intent);
 
@@ -161,7 +161,6 @@ public class Login extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Autenticação falhou\n\n" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }else{
                         cadastro = true;
-                        login(email, senha);
                         //Toast.makeText(getApplicationContext(), "createUserWithEmail:onComplete:" + task.isSuccessful(), Toast.LENGTH_SHORT).show();
                     }
                 }

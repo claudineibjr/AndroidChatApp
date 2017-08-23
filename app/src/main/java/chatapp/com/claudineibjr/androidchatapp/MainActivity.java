@@ -6,7 +6,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TabHost;
 import android.widget.Toast;
+
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,17 +28,19 @@ public class MainActivity extends AppCompatActivity {
 
             // Recebe o usuário da tela anterior
             usuario = (Usuario) extra.getSerializable("usuarioLogado");
-            //usuario.setConectado(true);
-
+            usuario.setConectado(true);
+            usuario.setUltimaVez(Calendar.getInstance().getTime());
+            
             if (extra.getBoolean("cadastro")){
                 //usuario.setImagem(Parametros.getBase64Image());
 
                 try{
                     Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
-                    Toast.makeText(getApplicationContext(), "Uhul", Toast.LENGTH_SHORT).show();
                 } catch (Exception e){
                     Toast.makeText(getApplicationContext(), "Não deu\n\n" + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
+            }else{
+
             }
         }
     }
