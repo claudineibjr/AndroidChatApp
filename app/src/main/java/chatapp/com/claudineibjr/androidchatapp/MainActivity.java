@@ -1,7 +1,9 @@
 package chatapp.com.claudineibjr.androidchatapp;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -9,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -18,11 +21,13 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -76,9 +81,11 @@ public class MainActivity extends AppCompatActivity {
 
     private Usuario usuario;
 
-    private ArrayList<DadosUsuario> contatos;
+    private ArrayList<DadosUsuario> contatos = new ArrayList<>();
 
     private ListView listaContatos;
+
+    private ContatosAdapter usuariosArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,22 +101,47 @@ public class MainActivity extends AppCompatActivity {
 
             // Recebe o usuário da tela anterior
             usuario = (Usuario) extra.getSerializable("usuarioLogado");
-            usuario.getDadosUsuario().setConectado(true);
-            usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
 
             if (extra.getBoolean("cadastro")){
+
+                usuario.getDadosUsuario().setConectado(true);
+                usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
+
                 try{
-                    Log.d(getClass().toString(), usuario.toString());
                     Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
                 } catch (Exception e){
                     Toast.makeText(getApplicationContext(), "Não deu\n\n" + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
-            }else{
 
+            }else{
+                Parametros.getUsuarioReferencia().orderByKey().equalTo(usuario.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot data : dataSnapshot.getChildren()) {
+                            usuario = data.getValue(Usuario.class);
+                            usuario.getDadosUsuario().setConectado(true);
+                            usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
+
+                            try{
+                                Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
+                            } catch (Exception e){
+                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+
+                            carregaContatos();
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         }
 
-        carregaContatos();
+
     }
 
     private void instanciaElementosVisuais() {
@@ -118,42 +150,33 @@ public class MainActivity extends AppCompatActivity {
 
     private void carregaContatos() {
 
-        //Parametros.getUsuarioReferencia().orderByChild("email").addValueEventListener(new ValueEventListener() {
-        Parametros.getUsuarioReferencia().child(usuario.getUid()).child("contatos").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+        usuariosArrayAdapter = new ContatosAdapter(contatos, MainActivity.this);
+        listaContatos.setAdapter(usuariosArrayAdapter);
 
-                contatos = new ArrayList<>();
+        for (Iterator<String> lstContato = usuario.getContatos().iterator(); lstContato.hasNext();){
+            String strContato = lstContato.next();
 
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    Parametros.getUsuarioReferencia().child(data.getValue().toString()).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                if (data.getKey().equals("dadosUsuario")){
-                                    contatos.add(data.getValue(DadosUsuario.class));
-                                    break;
-                                }
-                            }
+            Parametros.getUsuarioReferencia().child(strContato).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        if (data.getKey().equals("dadosUsuario")){
+                            contatos.add(data.getValue(DadosUsuario.class));
+                            break;
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
                 }
 
-                ContatosAdapter usuariosArrayAdapter = new ContatosAdapter(contatos, MainActivity.this);
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-                listaContatos.setAdapter(usuariosArrayAdapter);
-            }
+                }
+            });
+        }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+        usuariosArrayAdapter.notifyDataSetChanged();
 
-            }
-        });
     }
 
     private void preparaAbas() {
@@ -195,12 +218,69 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_add_contato:{
+                novoContato();
+                return true;
+            }
+
             case R.id.menu_desconectar: {
                 desconecta();
                 return true;
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void novoContato() {
+        final EditText txtNovoContato = new EditText(this);
+        txtNovoContato.setHint("Exemplo: claudineibjr@hotmail.com");
+
+        new AlertDialog.Builder(this)
+                .setTitle("Novo contato")
+                .setMessage("Digite o e-mail do novo contato")
+                .setView(txtNovoContato)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        adicionaContato(txtNovoContato.getText().toString());
+                    }
+                }).show();
+    }
+
+    private void adicionaContato(String strNovoContato) {
+        Query queryEmail = Parametros.getUsuarioReferencia()
+                .orderByChild("dadosUsuario/email")
+                .equalTo(strNovoContato)
+                .limitToFirst(1);
+
+        queryEmail.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    usuario.addContato(data.getKey());
+
+                    for (DataSnapshot dataChild : data.getChildren()){
+                        if (dataChild.getKey().equals("dadosUsuario")){
+                            Log.d(getClass().toString(), dataChild.getKey() + "\n" + dataChild.getValue().toString());
+                            contatos.add(dataChild.getValue(DadosUsuario.class));
+                            usuariosArrayAdapter.notifyDataSetChanged();
+                            break;
+                        }
+                    }
+
+                    try {
+                        Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
+                    } catch (Exception e){
+                        Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

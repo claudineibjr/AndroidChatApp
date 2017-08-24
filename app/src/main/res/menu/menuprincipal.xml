@@ -8,11 +8,6 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_add_conversa"
-        android:title="Nova conversa"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/menu_add_contato"
         android:title="Adicionar contato"
         app:showAsAction="never" />
