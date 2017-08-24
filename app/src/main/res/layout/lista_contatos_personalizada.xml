@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/lista_contatos_personalizada"
+    android:layout_margin="15px">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="160px"
+            android:layout_height="160px"
+            android:src="@drawable/user_image"
+            android:layout_marginRight="10dp"
+            android:id="@+id/imgContato"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="100px"
+                android:text="Nome Nome Nome Nome Nome Nome Nome Nome"
+                android:textSize="24dp"
+                android:id="@+id/txtNomeContato"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50px"
+                android:text="Online"
+                android:layout_marginTop="10dp"
+                android:textSize="20dp"
+                android:id="@+id/txtStatusContato"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

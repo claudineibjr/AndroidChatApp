@@ -2,7 +2,6 @@ package chatapp.com.claudineibjr.androidchatapp;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by Claudinei on 22/08/2017.
@@ -11,50 +10,36 @@ import java.util.Date;
 public class Usuario implements Serializable {
 
     private String uid;
-    private String email;
-    private String imagem;
     private ArrayList<String> contatos = new ArrayList<>(); // uid dos contatos
     private ArrayList<String> conversasRecentes = new ArrayList<>(); // uid das conversas
-    private boolean conectado;
-    private Date ultimaVez;
+    private DadosUsuario dadosUsuario = new DadosUsuario();
 
     public Usuario(){}
 
     public Usuario(String uid, String email) {
         this.uid = uid;
-        this.email = email;
+        this.dadosUsuario.setEmail(email);
     }
 
     public Usuario(String uid, String email, String imagem, ArrayList<String> contatos, ArrayList<String> conversasRecentes) {
         this.uid = uid;
-        this.email = email;
-        this.imagem = imagem;
         this.contatos = contatos;
         this.conversasRecentes = conversasRecentes;
+        this.dadosUsuario = new DadosUsuario(email, imagem);
+    }
+
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "uid='" + uid + '\'' +
+                ", contatos=" + contatos +
+                ", conversasRecentes=" + conversasRecentes +
+                ", dadosUsuario=" + dadosUsuario +
+                '}';
     }
 
     public String getUid() {
         return uid;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getImagem() {
-        return imagem;
-    }
-
-    public void setImagem(String imagem) {
-        this.imagem = imagem;
     }
 
     public ArrayList<String> getContatos(){
@@ -69,11 +54,7 @@ public class Usuario implements Serializable {
         return conversasRecentes;
     }
 
-    public boolean isConectado() {  return conectado;   }
-
-    public void setConectado(boolean conectado) {   this.conectado = conectado; }
-
-    public Date getUltimaVez() {    return ultimaVez;   }
-
-    public void setUltimaVez(Date ultimaVez) {  this.ultimaVez = ultimaVez; }
+    public DadosUsuario getDadosUsuario() {
+        return dadosUsuario;
+    }
 }

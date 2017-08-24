@@ -42,6 +42,13 @@
                 android:layout_marginTop="10dp"
                 android:orientation="vertical">
 
+                <ListView
+                    android:id="@+id/lista_contatos"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                </ListView>
+
             </LinearLayout>
         </FrameLayout>
     </LinearLayout>
