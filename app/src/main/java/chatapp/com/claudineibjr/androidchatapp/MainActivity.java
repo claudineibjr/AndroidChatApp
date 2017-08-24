@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Usuario usuario;
 
-    private ArrayList<Usuario> contatos;
+    private ArrayList<DadosUsuario> contatos;
 
     private ListView listaContatos;
 
@@ -123,15 +123,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                ArrayList<Usuario> contatos_aux = new ArrayList<>();
                 contatos = new ArrayList<>();
 
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    Parametros.getUsuarioReferencia().child(data.getValue().toString()).child("dadosUsuario").addValueEventListener(new ValueEventListener() {
+                    Parametros.getUsuarioReferencia().child(data.getValue().toString()).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                Log.d(getClass().toString(), data.getValue().toString());
+                                if (data.getKey().equals("dadosUsuario")){
+                                    contatos.add(data.getValue(DadosUsuario.class));
+                                    break;
+                                }
                             }
                         }
 
@@ -142,13 +144,9 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
 
-                /*for (int i = contatos_aux.size() - 1; i >= 0; i--){
-                    contatos.add(contatos_aux.get(i));
-                }*/
+                ContatosAdapter usuariosArrayAdapter = new ContatosAdapter(contatos, MainActivity.this);
 
-                /*ContatosAdapter usuariosArrayAdapter = new ContatosAdapter(contatos, MainActivity.this);*/
-
-                /*listaContatos.setAdapter(usuariosArrayAdapter);*/
+                listaContatos.setAdapter(usuariosArrayAdapter);
             }
 
             @Override

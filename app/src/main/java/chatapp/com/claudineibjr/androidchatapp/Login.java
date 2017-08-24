@@ -98,7 +98,7 @@ public class Login extends AppCompatActivity {
                             //Indo para a próxima tela
                             Intent intent = new Intent(Login.this, MainActivity.class);
                             intent.putExtra("usuarioLogado", usuarioLogado);
-                            intent.putExtra("cadastro", true);
+                            intent.putExtra("cadastro", cadastro);
 
                             startActivity(intent);
 
