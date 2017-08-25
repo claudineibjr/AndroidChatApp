@@ -2,6 +2,7 @@ package chatapp.com.claudineibjr.androidchatapp;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -74,7 +75,24 @@ public class MainActivity extends AppCompatActivity {
             imgContato.setImageBitmap(decodedImage);*/
 
             txtNomeContato.setText(contato.getEmail());
-            txtStatusContato.setText(contato.isConectado() ? "Online" : "Ausente desde " + new SimpleDateFormat("dd/MM/yyyy  H:m").format(contato.getUltimaVez()));
+
+            txtStatusContato.setText(
+                    contato.isConectado() ?
+                            "Online" :
+                            "Ausente " +
+                                    (Calendar.getInstance().getTime().compareTo(contato.getUltimaVez()) == 1 ?
+                                            "desde ontem às " + new SimpleDateFormat("H:m").format(contato.getUltimaVez()) :
+                                            (Calendar.getInstance().getTime().compareTo(contato.getUltimaVez()) == 0 ?
+                                                    "desde hoje às " + new SimpleDateFormat("H:m").format(contato.getUltimaVez()) :
+                                                    "há " + Calendar.getInstance().getTime().compareTo(contato.getUltimaVez()) + " dias"
+                                            )
+                                    )
+            );
+
+            txtStatusContato.setTextColor(
+                    contato.isConectado() ?
+                            Color.parseColor("#00C853") :
+                            Color.parseColor("#000000"));
             return view;
         }
     }
