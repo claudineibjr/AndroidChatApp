@@ -29,7 +29,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -154,7 +156,12 @@ public class MainActivity extends AppCompatActivity {
                             usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
 
                             try{
-                                Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
+                                Map<String, Object> atualizacoes = new HashMap<>();
+                                atualizacoes.put("/dadosUsuario/conectado", usuario.getDadosUsuario().isConectado());
+                                atualizacoes.put("/dadosUsuario/ultimaVez", usuario.getDadosUsuario().getUltimaVez());
+
+                                Parametros.getUsuarioReferencia().child(usuario.getUid()).updateChildren(atualizacoes);
+
                             } catch (Exception e){
                                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
@@ -240,7 +247,14 @@ public class MainActivity extends AppCompatActivity {
 
         usuario.getDadosUsuario().setConectado(false);
         usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
-        Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
+
+        Map<String, Object> atualizacoes = new HashMap<>();
+        atualizacoes.put("/dadosUsuario/conectado", usuario.getDadosUsuario().isConectado());
+        atualizacoes.put("/dadosUsuario/ultimaVez", usuario.getDadosUsuario().getUltimaVez());
+
+        Parametros.getUsuarioReferencia().child(usuario.getUid()).updateChildren(atualizacoes);
+
+        //Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
 
         FirebaseAuth.getInstance().signOut();
         finish();
@@ -300,7 +314,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     try {
-                        Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
+                        Parametros.getUsuarioReferencia().child(usuario.getUid()).child("contatos").setValue(usuario.getContatos());
+ 
+                        //Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
                     } catch (Exception e){
                         Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -319,7 +335,13 @@ public class MainActivity extends AppCompatActivity {
 
         usuario.getDadosUsuario().setConectado(false);
         usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
-        Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
+
+        Map<String, Object> atualizacoes = new HashMap<>();
+        atualizacoes.put("/dadosUsuario/conectado", usuario.getDadosUsuario().isConectado());
+        atualizacoes.put("/dadosUsuario/ultimaVez", usuario.getDadosUsuario().getUltimaVez());
+
+        Parametros.getUsuarioReferencia().child(usuario.getUid()).updateChildren(atualizacoes);
+        //Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
 
         super.onStop();
     }
