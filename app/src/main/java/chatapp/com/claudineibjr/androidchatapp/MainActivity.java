@@ -2,6 +2,7 @@ package chatapp.com.claudineibjr.androidchatapp;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -62,11 +63,11 @@ public class MainActivity extends AppCompatActivity {
 
             View view = activity.getLayoutInflater().inflate(R.layout.lista_contatos_personalizada, parent, false);
 
-            DadosUsuario contato = contatos.get(position);
+            final DadosUsuario contato = contatos.get(position);
 
             //Instanciando as Views
             ImageView imgContato = (ImageView) view.findViewById(R.id.imgContato);
-            TextView txtNomeContato = (TextView) view.findViewById(R.id.txtNomeContato);
+            final TextView txtNomeContato = (TextView) view.findViewById(R.id.txtNomeContato);
             TextView txtStatusContato = (TextView) view.findViewById(R.id.txtStatusContato);
 
             //Definindo os valores para as Views
@@ -93,6 +94,18 @@ public class MainActivity extends AppCompatActivity {
                     contato.isConectado() ?
                             Color.parseColor("#00C853") :
                             Color.parseColor("#000000"));
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Indo para a próxima tela
+                    Intent intent = new Intent(MainActivity.this, Conversa.class);
+                    intent.putExtra("teste", txtNomeContato.getText().toString());
+
+                    startActivity(intent);
+                }
+            });
+
             return view;
         }
     }
