@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity"></activity>
-        <activity android:name=".Conversa"></activity>
+        <activity android:name=".ConversaActivity"></activity>
     </application>
 
 </manifest>

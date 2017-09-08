@@ -12,6 +12,7 @@ public final class Parametros {
     private static DatabaseReference databaseReference;
     private static DatabaseReference usuarioReferencia = getDatabaseReference().child("usuario");
     private static DatabaseReference conversaReferencia = getDatabaseReference().child("conversa");
+    private static DatabaseReference mensagensReferencia = getDatabaseReference().child("mensagens");
     private static DatabaseReference conexaoReferencia = FirebaseDatabase.getInstance().getReference(".info/connected");
 
     public static DatabaseReference getDatabaseReference(){
@@ -32,5 +33,9 @@ public final class Parametros {
 
     public static DatabaseReference getConexaoReferencia() {
         return conexaoReferencia;
+    }
+
+    public static DatabaseReference getMensagensReferencia() {
+        return mensagensReferencia;
     }
 }

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -83,11 +84,11 @@ public class MainActivity extends AppCompatActivity {
                     contato.isConectado() ?
                             "Online" :
                             "Ausente " +
-                                    (Calendar.getInstance().getTime().compareTo(contato.getUltimaVez()) == 1 ?
+                                    (Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) == 1 ?
                                             "desde ontem às " + new SimpleDateFormat("H:m").format(contato.getUltimaVez()) :
-                                            (Calendar.getInstance().getTime().compareTo(contato.getUltimaVez()) == 0 ?
+                                            (Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) == 0 ?
                                                     "desde hoje às " + new SimpleDateFormat("H:m").format(contato.getUltimaVez()) :
-                                                    "há " + Calendar.getInstance().getTime().compareTo(contato.getUltimaVez()) + " dias"
+                                                    "há " + Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) + " dias"
                                             )
                                     )
             );
@@ -101,8 +102,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     //Indo para a próxima tela
-                    Intent intent = new Intent(MainActivity.this, Conversa.class);
-                    intent.putExtra("teste", txtNomeContato.getText().toString());
+                    Intent intent = new Intent(MainActivity.this, ConversaActivity.class);
+                    intent.putExtra("usuarioDestinatario", txtNomeContato.getText().toString());
+                    intent.putExtra("usuarioLogado", usuario);
 
                     startActivity(intent);
                 }
@@ -138,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
             if (extra.getBoolean("cadastro")){
 
                 usuario.getDadosUsuario().setConectado(true);
-                usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
+                usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance(new Locale("pt", "br")).getTime());
 
                 try{
                     Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
@@ -153,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
                         for (DataSnapshot data : dataSnapshot.getChildren()) {
                             usuario = data.getValue(Usuario.class);
                             usuario.getDadosUsuario().setConectado(true);
-                            usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
+                            usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance(new Locale("pt", "br")).getTime());
 
                             try{
                                 Map<String, Object> atualizacoes = new HashMap<>();
@@ -246,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
         // Desconecta o usuário
 
         usuario.getDadosUsuario().setConectado(false);
-        usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
+        usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance(new Locale("pt", "br")).getTime());
 
         Map<String, Object> atualizacoes = new HashMap<>();
         atualizacoes.put("/dadosUsuario/conectado", usuario.getDadosUsuario().isConectado());
@@ -315,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
 
                     try {
                         Parametros.getUsuarioReferencia().child(usuario.getUid()).child("contatos").setValue(usuario.getContatos());
- 
+
                         //Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
                     } catch (Exception e){
                         Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -334,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
 
         usuario.getDadosUsuario().setConectado(false);
-        usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance().getTime());
+        usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance(new Locale("pt", "br")).getTime());
 
         Map<String, Object> atualizacoes = new HashMap<>();
         atualizacoes.put("/dadosUsuario/conectado", usuario.getDadosUsuario().isConectado());

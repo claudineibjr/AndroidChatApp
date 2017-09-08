@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#efefef"
     android:orientation="vertical"
-    tools:context="chatapp.com.claudineibjr.androidchatapp.Conversa">
+    tools:context="chatapp.com.claudineibjr.androidchatapp.ConversaActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
