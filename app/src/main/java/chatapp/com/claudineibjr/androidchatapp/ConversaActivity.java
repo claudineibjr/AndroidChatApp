@@ -15,11 +15,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -33,7 +36,11 @@ public class ConversaActivity extends AppCompatActivity {
 
     private Usuario usuario;
     private DadosUsuario usuarioDestinatario;
-    private String usuarioDestinatario_key;
+    private String usuarioDestinatario_uid;
+
+    private Button btnDBGEnviar, btnDBGReceber;
+
+    private boolean dadosCarregados = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,12 +68,13 @@ public class ConversaActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        usuarioDestinatario_key = data.getKey();
+                        usuarioDestinatario_uid = data.getKey();
+                        dadosCarregados = true;
+                        carregaMensagens();
 
                         for (DataSnapshot dataChild : data.getChildren()){
                             if (dataChild.getKey().equals("dadosUsuario")){
                                 usuarioDestinatario = dataChild.getValue(DadosUsuario.class);
-                                Toast.makeText(getApplicationContext(), "Carregou", Toast.LENGTH_SHORT).show();
                                 break;
                             }
                         }
@@ -82,6 +90,63 @@ public class ConversaActivity extends AppCompatActivity {
         }
     }
 
+    private void carregaMensagens() {
+        String keyConversa;
+
+        if (usuario.getUid().compareToIgnoreCase(usuarioDestinatario_uid) > 0)
+            keyConversa = usuarioDestinatario_uid + "-" + usuario.getUid();
+        else
+            keyConversa = usuario.getUid() + "-" + usuarioDestinatario_uid;
+
+        final ArrayList<Mensagem> mensagens = new ArrayList<>();
+
+        final int teste = 0;
+
+        Parametros.getMensagensReferencia().child(keyConversa).limitToLast(10).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d(getClass().toString(), dataSnapshot.getValue().toString());
+                mensagens.add(dataSnapshot.getValue(Mensagem.class));
+                adicionaMensagemTela(dataSnapshot.getValue(Mensagem.class));
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        /*Parametros.getMensagensReferencia().child(keyConversa).limitToLast(10).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot data : dataSnapshot.getChildren()) {
+                    mensagens.add(data.getValue(Mensagem.class));
+                    adicionaMensagemTela(data.getValue(Mensagem.class));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });*/
+    }
+
     private void instanciaElementosVisuais() {
         linearLayoutConversa = (LinearLayout) findViewById(R.id.linearLayoutConversa);
         txtMensagem = (EditText) findViewById(R.id.txtMensagem);
@@ -90,32 +155,73 @@ public class ConversaActivity extends AppCompatActivity {
         btnEnviarMensagem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    adicionaMensagemTela(txtMensagem.getText().toString(), false);
 
-                    Map<String, Object> atualizacoes = new HashMap<>();
-                    atualizacoes.put("texto", txtMensagem.getText().toString());
-                    atualizacoes.put("data", Calendar.getInstance(new Locale("pt", "br")).getTime());
+                if (dadosCarregados) {
 
-                    Parametros.getMensagensReferencia().child(usuario.getUid()).child(usuarioDestinatario_key).push().updateChildren(atualizacoes);
+                    try {
+                        String keyConversa = "";
 
-                    txtMensagem.setText("");
+                        if (usuario.getUid().compareToIgnoreCase(usuarioDestinatario_uid) > 0)
+                            keyConversa = usuarioDestinatario_uid + "-" + usuario.getUid();
+                        else
+                            keyConversa = usuario.getUid() + "-" + usuarioDestinatario_uid;
 
-                }catch (Exception e){
-                    Log.d(getClass().toString(), e.getMessage());
+                        Mensagem mensagem = new Mensagem(usuario.getUid(),
+                                usuarioDestinatario_uid,
+                                txtMensagem.getText().toString(),
+                                Calendar.getInstance(new Locale("pt", "br")).getTime());
+
+                        adicionaMensagemTela(mensagem);
+
+                        Map<String, Object> atualizacoes = new HashMap<>();
+                        atualizacoes.put("remetente", mensagem.getRemetente());
+                        atualizacoes.put("destinatario", mensagem.getDestinatario());
+                        atualizacoes.put("texto", mensagem.getTexto());
+                        atualizacoes.put("data", mensagem.getData());
+
+                        Parametros.getMensagensReferencia()
+                                .child(keyConversa)
+                                .push()
+                                .updateChildren(atualizacoes);
+
+                        txtMensagem.setText("");
+
+                    } catch (Exception e) {
+                        Toast.makeText(getApplicationContext(), "Erro ao enviar a mensagem para o banco de dados\n\n" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }else{
+                    Toast.makeText(getApplicationContext(), "Carregando as informações, tente novamente em alguns segundos...", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        btnDBGEnviar = (Button) findViewById(R.id.btnDBGEnviar);
+        btnDBGEnviar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dbgMensagem(true);
+            }
+        });
+
+        btnDBGReceber = (Button) findViewById(R.id.btnDBGReceber);
+        btnDBGReceber.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dbgMensagem(false);
             }
         });
     }
 
-    private void adicionaMensagemTela(String mensagem, boolean recebida){
+    private void adicionaMensagemTela(Mensagem mensagem){
+
+        boolean recebida = (mensagem.getDestinatario().equals(usuario.getUid()));
 
         final TextView textViewMensagem = new TextView(this);
 
         textViewMensagem.setGravity(( recebida ? Gravity.START : Gravity.END));
         textViewMensagem.setBackgroundColor(( recebida ? Color.parseColor("#C5CAE9") : Color.parseColor("#BBDEFB")) );
         textViewMensagem.setTextColor(Color.parseColor("#000000"));
-        textViewMensagem.setText(mensagem);
+        textViewMensagem.setText(mensagem.getTexto());
         textViewMensagem.setTextSize(Dimension.SP, 14);
         textViewMensagem.setPadding(10, 10, 10, 10);
 
@@ -129,7 +235,7 @@ public class ConversaActivity extends AppCompatActivity {
         textViewHorario.setGravity(( recebida ? Gravity.START : Gravity.END));
         textViewHorario.setBackgroundColor(( recebida ? Color.parseColor("#C5CAE9") : Color.parseColor("#BBDEFB")) );
         textViewHorario.setTextColor(Color.parseColor("#000000"));
-        textViewHorario.setText("07/09/2017 18:22");
+        textViewHorario.setText(new SimpleDateFormat("H:m").format(mensagem.getData()));
         textViewHorario.setTextSize(Dimension.SP, 10);
         textViewHorario.setPadding(10, 10, 10, 10);
 
@@ -140,5 +246,30 @@ public class ConversaActivity extends AppCompatActivity {
 
         linearLayoutConversa.addView(textViewMensagem);
         linearLayoutConversa.addView(textViewHorario);
+    }
+
+    private void dbgMensagem(boolean envia){
+        String keyConversa = "";
+
+        if (usuario.getUid().compareToIgnoreCase(usuarioDestinatario_uid) > 0)
+            keyConversa = usuarioDestinatario_uid + "-" + usuario.getUid();
+        else
+            keyConversa = usuario.getUid() + "-" + usuarioDestinatario_uid;
+
+        Mensagem mensagem = new Mensagem((envia ? usuario.getUid() : usuarioDestinatario_uid) ,
+                (envia ? usuarioDestinatario_uid : usuario.getUid()),
+                txtMensagem.getText().toString(),
+                Calendar.getInstance(new Locale("pt", "br")).getTime());
+
+        Map<String, Object> atualizacoes = new HashMap<>();
+        atualizacoes.put("remetente", mensagem.getRemetente());
+        atualizacoes.put("destinatario", mensagem.getDestinatario());
+        atualizacoes.put("texto", mensagem.getTexto());
+        atualizacoes.put("data", mensagem.getData());
+
+        Parametros.getMensagensReferencia()
+                .child(keyConversa)
+                .push()
+                .updateChildren(atualizacoes);
     }
 }

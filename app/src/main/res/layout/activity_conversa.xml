@@ -58,9 +58,16 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <EditText
+            <!--<EditText
                 android:id="@+id/txtMensagem"
                 android:layout_width="325dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textAutoComplete|textLongMessage" />-->
+
+            <EditText
+                android:id="@+id/txtMensagem"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:inputType="textAutoComplete|textLongMessage" />
@@ -71,6 +78,20 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Button" />
+
+            <Button
+                android:id="@+id/btnDBGEnviar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Enviar" />
+
+            <Button
+                android:id="@+id/btnDBGReceber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Receber" />
 
 
         </LinearLayout>
