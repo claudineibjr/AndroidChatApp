@@ -84,11 +84,11 @@ public class MainActivity extends AppCompatActivity {
                     contato.isConectado() ?
                             "Online" :
                             "Ausente " +
-                                    (Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) == 1 ?
-                                            "desde ontem às " + new SimpleDateFormat("H:m").format(contato.getUltimaVez()) :
+                                    (Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(contato.getUltimaVez()) == 1 ?
+                                            "desde ontem às " + new SimpleDateFormat("HH:mm").format(contato.getUltimaVez()) :
                                             (Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) == 0 ?
-                                                    "desde hoje às " + new SimpleDateFormat("H:m").format(contato.getUltimaVez()) :
-                                                    "há " + Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) + " dias"
+                                                    "desde hoje às " + new SimpleDateFormat("HH:mM").format(contato.getUltimaVez()) :
+                                                    "há " + Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(contato.getUltimaVez()) + " dias"
                                             )
                                     )
             );
@@ -308,7 +308,6 @@ public class MainActivity extends AppCompatActivity {
 
                     for (DataSnapshot dataChild : data.getChildren()){
                         if (dataChild.getKey().equals("dadosUsuario")){
-                            Log.d(getClass().toString(), dataChild.getKey() + "\n" + dataChild.getValue().toString());
                             contatos.add(dataChild.getValue(DadosUsuario.class));
                             usuariosArrayAdapter.notifyDataSetChanged();
                             break;
@@ -317,8 +316,6 @@ public class MainActivity extends AppCompatActivity {
 
                     try {
                         Parametros.getUsuarioReferencia().child(usuario.getUid()).child("contatos").setValue(usuario.getContatos());
-
-                        //Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
                     } catch (Exception e){
                         Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -343,7 +340,6 @@ public class MainActivity extends AppCompatActivity {
         atualizacoes.put("/dadosUsuario/ultimaVez", usuario.getDadosUsuario().getUltimaVez());
 
         Parametros.getUsuarioReferencia().child(usuario.getUid()).updateChildren(atualizacoes);
-        //Parametros.getUsuarioReferencia().child(usuario.getUid()).setValue(usuario);
 
         super.onStop();
     }

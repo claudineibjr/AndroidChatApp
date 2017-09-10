@@ -9,9 +9,10 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,12 +28,19 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class ConversaActivity extends AppCompatActivity {
 
+    private ScrollView scrollConversa;
+
     private LinearLayout linearLayoutConversa;
+
     private Button btnEnviarMensagem;
-    private EditText txtMensagem;
+
+    private AutoCompleteTextView txtMensagem;
+    private TextView txtNomeContato;
+    private TextView txtStatusContato;
 
     private Usuario usuario;
     private DadosUsuario usuarioDestinatario;
@@ -75,6 +83,17 @@ public class ConversaActivity extends AppCompatActivity {
                         for (DataSnapshot dataChild : data.getChildren()){
                             if (dataChild.getKey().equals("dadosUsuario")){
                                 usuarioDestinatario = dataChild.getValue(DadosUsuario.class);
+                                txtNomeContato.setText(usuarioDestinatario.getEmail());
+                                txtStatusContato.setText(usuarioDestinatario.isConectado() ?
+                                        "Online" :
+                                        "Ausente " +
+                                                (Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(usuarioDestinatario.getUltimaVez()) == 1 ?
+                                                        "desde ontem às " + new SimpleDateFormat("HH:mm").format(usuarioDestinatario.getUltimaVez()) :
+                                                        (Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(usuarioDestinatario.getUltimaVez()) == 0 ?
+                                                                "desde hoje às " + new SimpleDateFormat("HH:mM").format(usuarioDestinatario.getUltimaVez()) :
+                                                                "há " + Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(usuarioDestinatario.getUltimaVez()) + " dias"
+                                                        )
+                                                ));
                                 break;
                             }
                         }
@@ -99,8 +118,6 @@ public class ConversaActivity extends AppCompatActivity {
             keyConversa = usuario.getUid() + "-" + usuarioDestinatario_uid;
 
         final ArrayList<Mensagem> mensagens = new ArrayList<>();
-
-        final int teste = 0;
 
         Parametros.getMensagensReferencia().child(keyConversa).limitToLast(10).addChildEventListener(new ChildEventListener() {
             @Override
@@ -131,25 +148,14 @@ public class ConversaActivity extends AppCompatActivity {
             }
         });
 
-        /*Parametros.getMensagensReferencia().child(keyConversa).limitToLast(10).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    mensagens.add(data.getValue(Mensagem.class));
-                    adicionaMensagemTela(data.getValue(Mensagem.class));
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });*/
     }
 
     private void instanciaElementosVisuais() {
         linearLayoutConversa = (LinearLayout) findViewById(R.id.linearLayoutConversa);
-        txtMensagem = (EditText) findViewById(R.id.txtMensagem);
+
+        txtMensagem = (AutoCompleteTextView) findViewById(R.id.txtMensagem);
+        txtNomeContato = (TextView) findViewById(R.id.conversa_txtNomeContato);
+        txtStatusContato = (TextView) findViewById(R.id.conversa_txtStatusContato);
 
         btnEnviarMensagem = (Button) findViewById(R.id.btnEnviar);
         btnEnviarMensagem.setOnClickListener(new View.OnClickListener() {
@@ -169,7 +175,7 @@ public class ConversaActivity extends AppCompatActivity {
                         Mensagem mensagem = new Mensagem(usuario.getUid(),
                                 usuarioDestinatario_uid,
                                 txtMensagem.getText().toString(),
-                                Calendar.getInstance(new Locale("pt", "br")).getTime());
+                                Calendar.getInstance(Locale.getDefault()).getTime());
 
                         adicionaMensagemTela(mensagem);
 
@@ -210,6 +216,8 @@ public class ConversaActivity extends AppCompatActivity {
                 dbgMensagem(false);
             }
         });
+
+        scrollConversa = (ScrollView) findViewById(R.id.scrollConversa);
     }
 
     private void adicionaMensagemTela(Mensagem mensagem){
@@ -235,7 +243,7 @@ public class ConversaActivity extends AppCompatActivity {
         textViewHorario.setGravity(( recebida ? Gravity.START : Gravity.END));
         textViewHorario.setBackgroundColor(( recebida ? Color.parseColor("#C5CAE9") : Color.parseColor("#BBDEFB")) );
         textViewHorario.setTextColor(Color.parseColor("#000000"));
-        textViewHorario.setText(new SimpleDateFormat("H:m").format(mensagem.getData()));
+        textViewHorario.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(mensagem.getData()));
         textViewHorario.setTextSize(Dimension.SP, 10);
         textViewHorario.setPadding(10, 10, 10, 10);
 
@@ -246,6 +254,8 @@ public class ConversaActivity extends AppCompatActivity {
 
         linearLayoutConversa.addView(textViewMensagem);
         linearLayoutConversa.addView(textViewHorario);
+
+        scrollConversa.fullScroll(View.FOCUS_DOWN);
     }
 
     private void dbgMensagem(boolean envia){
@@ -259,7 +269,7 @@ public class ConversaActivity extends AppCompatActivity {
         Mensagem mensagem = new Mensagem((envia ? usuario.getUid() : usuarioDestinatario_uid) ,
                 (envia ? usuarioDestinatario_uid : usuario.getUid()),
                 txtMensagem.getText().toString(),
-                Calendar.getInstance(new Locale("pt", "br")).getTime());
+                Calendar.getInstance(TimeZone.getTimeZone("UTC-3")).getTime());
 
         Map<String, Object> atualizacoes = new HashMap<>();
         atualizacoes.put("remetente", mensagem.getRemetente());
