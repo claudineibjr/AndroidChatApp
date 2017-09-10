@@ -114,6 +114,84 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public class ConversasAdapter extends BaseAdapter {
+
+        private final ArrayList<DadosUsuario> contatos;
+        private final Activity activity;
+
+        public ConversasAdapter(ArrayList<DadosUsuario> contatos, Activity activity) {
+            this.contatos = contatos;
+            this.activity = activity;
+        }
+
+        @Override
+        public int getCount() {
+            return contatos.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return contatos.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            View view = activity.getLayoutInflater().inflate(R.layout.lista_conversas_personalizada, parent, false);
+
+            final DadosUsuario contato = contatos.get(position);
+
+            //Instanciando as Views
+            ImageView imgContato = (ImageView) view.findViewById(R.id.imgContato);
+            final TextView txtNomeContato = (TextView) view.findViewById(R.id.txtNomeContato);
+            TextView txtStatusContato = (TextView) view.findViewById(R.id.txtStatusContato);
+
+            //Definindo os valores para as Views
+            /*byte[] imageBytes = Base64.decode(contato.getImagem(), Base64.DEFAULT);
+            Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            imgContato.setImageBitmap(decodedImage);*/
+
+            txtNomeContato.setText(contato.getEmail());
+
+            txtStatusContato.setText(
+                    contato.isConectado() ?
+                            "Online" :
+                            "Ausente " +
+                                    (Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(contato.getUltimaVez()) == 1 ?
+                                            "desde ontem às " + new SimpleDateFormat("HH:mm").format(contato.getUltimaVez()) :
+                                            (Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) == 0 ?
+                                                    "desde hoje às " + new SimpleDateFormat("HH:mM").format(contato.getUltimaVez()) :
+                                                    "há " + Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(contato.getUltimaVez()) + " dias"
+                                            )
+                                    )
+            );
+
+            txtStatusContato.setTextColor(
+                    contato.isConectado() ?
+                            Color.parseColor("#00C853") :
+                            Color.parseColor("#000000"));
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //Indo para a próxima tela
+                    Intent intent = new Intent(MainActivity.this, ConversaActivity.class);
+                    intent.putExtra("usuarioDestinatario", txtNomeContato.getText().toString());
+                    intent.putExtra("usuarioLogado", usuario);
+
+                    startActivity(intent);
+                }
+            });
+
+            return view;
+        }
+    }
+
     private Usuario usuario;
 
     private ArrayList<DadosUsuario> contatos = new ArrayList<>();
@@ -153,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot data : dataSnapshot.getChildren()) {
+                            Log.d(getClass().toString(), data.getValue().toString());
                             usuario = data.getValue(Usuario.class);
                             usuario.getDadosUsuario().setConectado(true);
                             usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance(new Locale("pt", "br")).getTime());

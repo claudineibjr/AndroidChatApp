@@ -119,7 +119,7 @@ public class ConversaActivity extends AppCompatActivity {
 
         final ArrayList<Mensagem> mensagens = new ArrayList<>();
 
-        Parametros.getMensagensReferencia().child(keyConversa).limitToLast(10).addChildEventListener(new ChildEventListener() {
+        Parametros.getMensagensReferencia().child(keyConversa).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(getClass().toString(), dataSnapshot.getValue().toString());
@@ -177,17 +177,34 @@ public class ConversaActivity extends AppCompatActivity {
                                 txtMensagem.getText().toString(),
                                 Calendar.getInstance(Locale.getDefault()).getTime());
 
-                        adicionaMensagemTela(mensagem);
-
                         Map<String, Object> atualizacoes = new HashMap<>();
                         atualizacoes.put("remetente", mensagem.getRemetente());
                         atualizacoes.put("destinatario", mensagem.getDestinatario());
                         atualizacoes.put("texto", mensagem.getTexto());
                         atualizacoes.put("data", mensagem.getData());
 
-                        Parametros.getMensagensReferencia()
+                        String keyMensagem = Parametros.getMensagensReferencia()
                                 .child(keyConversa)
                                 .push()
+                                .getKey();
+
+                        Parametros.getMensagensReferencia()
+                                .child(keyConversa)
+                                .child(keyMensagem)
+                                .updateChildren(atualizacoes);
+
+                        atualizacoes = new HashMap<>();
+                        atualizacoes.put("mensagem", keyMensagem);
+                        Parametros.getUsuarioReferencia()
+                                .child(usuario.getUid())
+                                .child(Parametros.getConversasRecentes())
+                                .child(usuarioDestinatario_uid)
+                                .updateChildren(atualizacoes);
+
+                        Parametros.getUsuarioReferencia()
+                                .child(usuarioDestinatario_uid)
+                                .child(Parametros.getConversasRecentes())
+                                .child(usuario.getUid())
                                 .updateChildren(atualizacoes);
 
                         txtMensagem.setText("");
@@ -254,8 +271,6 @@ public class ConversaActivity extends AppCompatActivity {
 
         linearLayoutConversa.addView(textViewMensagem);
         linearLayoutConversa.addView(textViewHorario);
-
-        scrollConversa.fullScroll(View.FOCUS_DOWN);
     }
 
     private void dbgMensagem(boolean envia){
