@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -69,15 +68,10 @@ public class MainActivity extends AppCompatActivity {
             final DadosUsuario contato = contatos.get(position);
 
             //Instanciando as Views
-            ImageView imgContato = (ImageView) view.findViewById(R.id.imgContato);
             final TextView txtNomeContato = (TextView) view.findViewById(R.id.txtNomeContato);
             TextView txtStatusContato = (TextView) view.findViewById(R.id.txtStatusContato);
 
             //Definindo os valores para as Views
-            /*byte[] imageBytes = Base64.decode(contato.getImagem(), Base64.DEFAULT);
-            Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            imgContato.setImageBitmap(decodedImage);*/
-
             txtNomeContato.setText(contato.getEmail());
 
             txtStatusContato.setText(
@@ -87,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                                     (Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(contato.getUltimaVez()) == 1 ?
                                             "desde ontem às " + new SimpleDateFormat("HH:mm").format(contato.getUltimaVez()) :
                                             (Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) == 0 ?
-                                                    "desde hoje às " + new SimpleDateFormat("HH:mM").format(contato.getUltimaVez()) :
+                                                    "desde hoje às " + new SimpleDateFormat("HH:mm").format(contato.getUltimaVez()) :
                                                     "há " + Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(contato.getUltimaVez()) + " dias"
                                             )
                                     )
@@ -101,12 +95,12 @@ public class MainActivity extends AppCompatActivity {
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //Indo para a próxima tela
-                    Intent intent = new Intent(MainActivity.this, ConversaActivity.class);
-                    intent.putExtra("usuarioDestinatario", txtNomeContato.getText().toString());
-                    intent.putExtra("usuarioLogado", usuario);
+                //Indo para a próxima tela
+                Intent intent = new Intent(MainActivity.this, ConversaActivity.class);
+                intent.putExtra("usuarioDestinatario", txtNomeContato.getText().toString());
+                intent.putExtra("usuarioLogado", usuario);
 
-                    startActivity(intent);
+                startActivity(intent);
                 }
             });
 
@@ -116,22 +110,22 @@ public class MainActivity extends AppCompatActivity {
 
     public class ConversasAdapter extends BaseAdapter {
 
-        private final ArrayList<DadosUsuario> contatos;
+        private final ArrayList<ConversaRecente> conversasRecentes;
         private final Activity activity;
 
-        public ConversasAdapter(ArrayList<DadosUsuario> contatos, Activity activity) {
-            this.contatos = contatos;
+        public ConversasAdapter(ArrayList<ConversaRecente> conversasRecentes, Activity activity) {
+            this.conversasRecentes = conversasRecentes;
             this.activity = activity;
         }
 
         @Override
         public int getCount() {
-            return contatos.size();
+            return conversasRecentes.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return contatos.get(position);
+            return conversasRecentes.get(position);
         }
 
         @Override
@@ -144,47 +138,27 @@ public class MainActivity extends AppCompatActivity {
 
             View view = activity.getLayoutInflater().inflate(R.layout.lista_conversas_personalizada, parent, false);
 
-            final DadosUsuario contato = contatos.get(position);
+            final ConversaRecente conversaRecente = conversasRecentes.get(position);
 
             //Instanciando as Views
-            ImageView imgContato = (ImageView) view.findViewById(R.id.imgContato);
-            final TextView txtNomeContato = (TextView) view.findViewById(R.id.txtNomeContato);
-            TextView txtStatusContato = (TextView) view.findViewById(R.id.txtStatusContato);
+            final TextView txtNomeContato = (TextView) view.findViewById(R.id.conversa_txtNomeContato);
+            TextView txtStatusContato = (TextView) view.findViewById(R.id.conversa_UltimaMensagem);
 
             //Definindo os valores para as Views
-            /*byte[] imageBytes = Base64.decode(contato.getImagem(), Base64.DEFAULT);
-            Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            imgContato.setImageBitmap(decodedImage);*/
-
-            txtNomeContato.setText(contato.getEmail());
-
-            txtStatusContato.setText(
-                    contato.isConectado() ?
-                            "Online" :
-                            "Ausente " +
-                                    (Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(contato.getUltimaVez()) == 1 ?
-                                            "desde ontem às " + new SimpleDateFormat("HH:mm").format(contato.getUltimaVez()) :
-                                            (Calendar.getInstance(new Locale("pt", "br")).getTime().compareTo(contato.getUltimaVez()) == 0 ?
-                                                    "desde hoje às " + new SimpleDateFormat("HH:mM").format(contato.getUltimaVez()) :
-                                                    "há " + Calendar.getInstance(new Locale("pt", "BR")).getTime().compareTo(contato.getUltimaVez()) + " dias"
-                                            )
-                                    )
-            );
-
-            txtStatusContato.setTextColor(
-                    contato.isConectado() ?
-                            Color.parseColor("#00C853") :
-                            Color.parseColor("#000000"));
+            txtNomeContato.setText(conversaRecente.getEmailContato());
+            txtStatusContato.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(conversaRecente.getMensagem().getData()));
+            txtStatusContato.setText(txtStatusContato.getText().toString() + (conversaRecente.getMensagem().getRemetente().equals(usuario.getUid()) ? " ► " : " ◄ "));
+            txtStatusContato.setText(txtStatusContato.getText().toString() + conversaRecente.getMensagem().getTexto());
 
             view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //Indo para a próxima tela
-                    Intent intent = new Intent(MainActivity.this, ConversaActivity.class);
-                    intent.putExtra("usuarioDestinatario", txtNomeContato.getText().toString());
-                    intent.putExtra("usuarioLogado", usuario);
+        @Override
+        public void onClick(View v) {
+                //Indo para a próxima tela
+                Intent intent = new Intent(MainActivity.this, ConversaActivity.class);
+                intent.putExtra("usuarioDestinatario", txtNomeContato.getText().toString());
+                intent.putExtra("usuarioLogado", usuario);
 
-                    startActivity(intent);
+                startActivity(intent);
                 }
             });
 
@@ -195,10 +169,13 @@ public class MainActivity extends AppCompatActivity {
     private Usuario usuario;
 
     private ArrayList<DadosUsuario> contatos = new ArrayList<>();
+    private ArrayList<ConversaRecente> conversas = new ArrayList<>();
 
     private ListView listaContatos;
+    private ListView listaConversas;
 
     private ContatosAdapter usuariosArrayAdapter;
+    private ConversasAdapter conversasArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,10 +208,13 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot data : dataSnapshot.getChildren()) {
-                            Log.d(getClass().toString(), data.getValue().toString());
+
                             usuario = data.getValue(Usuario.class);
                             usuario.getDadosUsuario().setConectado(true);
                             usuario.getDadosUsuario().setUltimaVez(Calendar.getInstance(new Locale("pt", "br")).getTime());
+
+                            carregaConversas();
+                            carregaContatos();
 
                             try{
                                 Map<String, Object> atualizacoes = new HashMap<>();
@@ -246,8 +226,6 @@ public class MainActivity extends AppCompatActivity {
                             } catch (Exception e){
                                 Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
-
-                            carregaContatos();
 
                         }
                     }
@@ -265,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void instanciaElementosVisuais() {
         listaContatos = (ListView) findViewById(R.id.lista_contatos);
+        listaConversas = (ListView) findViewById(R.id.lista_conversas);
     }
 
     private void carregaContatos() {
@@ -295,6 +274,70 @@ public class MainActivity extends AppCompatActivity {
         }
 
         usuariosArrayAdapter.notifyDataSetChanged();
+
+    }
+
+    private void carregaConversas() {
+
+        conversasArrayAdapter = new ConversasAdapter(conversas, MainActivity.this);
+        listaConversas.setAdapter(conversasArrayAdapter);
+
+        String uidContato, uidConversa;
+
+        for(Object objname: usuario.getConversasRecentes().keySet()) {
+            Log.d(getClass().toString() + "Conversas", "Chave: " + objname.toString());
+            uidContato = objname.toString();
+
+            Parametros.getUsuarioReferencia()
+                    .child(uidContato)
+                    .child(Parametros.getDadosUsuario())
+                    .child("email")
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+            //Destinatário = objname.toString();
+            for(Object objname2: usuario.getConversasRecentes().get(objname).keySet()) {
+                Log.d(getClass().toString() + "Conversas", "Valor: " + usuario.getConversasRecentes().get(objname).get(objname2).toString());
+
+                uidConversa = usuario.getConversasRecentes().get(objname).get(objname2).toString();
+
+                String keyConversa;
+
+                if (usuario.getUid().compareToIgnoreCase(uidContato) > 0)
+                    keyConversa = uidContato + "-" + usuario.getUid();
+                else
+                    keyConversa = usuario.getUid() + "-" + uidContato;
+
+                Parametros
+                        .getMensagensReferencia()
+                        .child(keyConversa)
+                        .child(uidConversa)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
+                //Mensagem = usuario.getConversasRecentes().get(objname).get(objname2).toString();
+            }
+        }
+
+        conversasArrayAdapter.notifyDataSetChanged();
 
     }
 

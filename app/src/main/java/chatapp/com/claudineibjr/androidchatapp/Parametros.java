@@ -16,6 +16,7 @@ public final class Parametros {
     private static DatabaseReference conexaoReferencia = FirebaseDatabase.getInstance().getReference(".info/connected");
 
     private static String conversasRecentes = "conversasRecentes";
+    private static String dadosUsuario = "dadosUsuario";
 
     public static DatabaseReference getDatabaseReference(){
 
@@ -43,5 +44,9 @@ public final class Parametros {
 
     public static String getConversasRecentes() {
         return conversasRecentes;
+    }
+
+    public static String getDadosUsuario() {
+        return dadosUsuario;
     }
 }

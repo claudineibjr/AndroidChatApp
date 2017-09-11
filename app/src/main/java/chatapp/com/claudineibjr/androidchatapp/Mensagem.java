@@ -38,4 +38,14 @@ public class Mensagem implements Serializable {
     public String getDestinatario() {
         return destinatario;
     }
+
+    @Override
+    public String toString() {
+        return "Mensagem{" +
+                "texto='" + texto + '\'' +
+                ", data=" + data +
+                ", remetente='" + remetente + '\'' +
+                ", destinatario='" + destinatario + '\'' +
+                '}';
+    }
 }
